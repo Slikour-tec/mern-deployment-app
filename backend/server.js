@@ -1,0 +1,24 @@
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import helmet from "helmet";
+import compression from "compression";
+import morgan from "morgan";
+import connectDB from "./config/db.js";
+import sampleRoutes from "./routes/sampleRoutes.js";
+import { errorHandler } from "./middleware/errorHandler.js";
+
+dotenv.config();
+connectDB();
+const app = express();
+app.use(helmet());
+app.use(compression());
+app.use(express.json());
+app.use(cors({ origin: process.env.CORS_ORIGIN || "*" }));
+if (process.env.NODE_ENV !== "production") app.use(morgan("dev"));
+app.get("/", (req, res) => res.send("🚀 MERN Backend is Live!"));
+app.use("/api/samples", sampleRoutes);
+app.get("/healthz", (req, res) => res.json({ status: "ok", uptime: process.uptime() }));
+app.use(errorHandler);
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
